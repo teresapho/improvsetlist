@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cue Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #15171D; --surface: #1E212A; --surface2: #262A35; --border: #33384A;
+    --text: #ECE9E2; --muted: #8D91A0; --accent: #E3A542; --accent-text:#1A1204;
+    --allplay: #5CADA8; --smallcast: #9C8CE0; --pun: #E3A542; --danger: #D06860;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg:#F3F1EC; --surface:#FFFFFF; --surface2:#EDEAE2; --border:#DAD5C9;
+      --text:#1C1E24; --muted:#6B6F7E; --accent-text:#1A1204;
+    }
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    padding: calc(env(safe-area-inset-top,0px) + 14px) 16px 0;
+    border-bottom:1px solid var(--border);
+  }
+  h1 {
+    font-family:'Bebas Neue',sans-serif; letter-spacing:0.03em;
+    font-size:2rem; margin:0; color:var(--accent);
+  }
+  .status { font-size:0.78rem; color:var(--muted); margin:2px 0 12px; }
+  .tabs { display:flex; gap:4px; }
+  .tab {
+    flex:1; text-align:center; padding:10px 4px 12px; background:none; border:none;
+    color:var(--muted); font:600 0.95rem 'Inter',sans-serif; cursor:pointer;
+    border-bottom:2px solid transparent;
+  }
+  .tab.active { color:var(--text); border-bottom-color:var(--accent); }
+  main { padding:16px; max-width:560px; margin:0 auto; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  .row { display:flex; gap:8px; align-items:center; }
+  select, input[type=text], textarea {
+    background:var(--surface2); color:var(--text); border:1px solid var(--border);
+    border-radius:10px; padding:10px 12px; font-size:0.95rem; font-family:inherit;
+  }
+  textarea { width:100%; resize:vertical; min-height:56px; line-height:1.4; }
+  select { flex:1; }
+  button {
+    font-family:'Inter',sans-serif; cursor:pointer; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface2); color:var(--text); padding:10px 14px; font-size:0.9rem; font-weight:600;
+  }
+  button.primary { background:var(--accent); color:var(--accent-text); border-color:var(--accent); }
+  button.ghost { background:none; border-color:var(--border); color:var(--muted); }
+  button.icon { padding:8px 10px; font-size:1rem; }
+  button:disabled { opacity:0.5; cursor:not-allowed; }
+  .gen-row { margin:14px 0 18px; }
+  .slot {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:14px; margin-bottom:10px;
+  }
+  .slot-top { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+  .slot.excluded { opacity:0.55; }
+  .slot-controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:10px; }
+  .slot-controls select { padding:6px 8px; font-size:0.82rem; flex:1; min-width:140px; }
+  .include-toggle { display:flex; align-items:center; gap:6px; font-size:0.8rem; color:var(--muted); }
+  .move-btns { display:flex; gap:4px; }
+  .slot-label { font-size:0.72rem; color:var(--muted); margin-bottom:3px; }
+  .slot-game { font-size:1.05rem; font-weight:600; }
+  .slot-tags { margin-top:6px; display:flex; gap:6px; flex-wrap:wrap; }
+  .tag {
+    font-size:0.7rem; padding:2px 8px; border-radius:999px; border:1px solid var(--border); color:var(--muted);
+  }
+  .tag.allplay { color:var(--allplay); border-color:var(--allplay); }
+  .tag.smallcast { color:var(--smallcast); border-color:var(--smallcast); }
+  .tag.pun { color:var(--pun); border-color:var(--pun); }
+  .empty {
+    text-align:center; color:var(--muted); padding:40px 20px; border:1px dashed var(--border);
+    border-radius:14px; font-size:0.95rem; line-height:1.5;
+  }
+  .lib-item {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:12px 14px; margin-bottom:8px;
+  }
+  .lib-item.excluded { opacity:0.55; }
+  .lib-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .lib-name { font-weight:600; margin-bottom:4px; }
+  .form-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px;
+  }
+  .form-card h3 { margin:0 0 12px; font-size:1rem; }
+  .field { margin-bottom:10px; }
+  .field label { display:block; font-size:0.78rem; color:var(--muted); margin-bottom:4px; }
+  .field input, .field select { width:100%; }
+  .subcat-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .chip {
+    padding:6px 12px; border-radius:999px; border:1px solid var(--border); background:none;
+    color:var(--muted); font-size:0.82rem;
+  }
+  .chip.selected { background:var(--accent); border-color:var(--accent); color:var(--accent-text); }
+  .lib-filter { margin-bottom:12px; }
+  .msg { font-size:0.85rem; color:var(--muted); margin-top:8px; }
+  .warn { color:var(--danger); font-size:0.85rem; margin-top:6px; }
+  h2.section {
+    font-family:'Bebas Neue',sans-serif; letter-spacing:0.02em; font-size:1.3rem; margin:0 0 10px; color:var(--text);
+  }
+  details.info { margin-top:8px; }
+  details.info summary {
+    cursor:pointer; font-size:0.78rem; color:var(--muted); list-style:none;
+  }
+  details.info summary::-webkit-details-marker { display:none; }
+  details.info summary:before { content:"Details ▸ "; }
+  details.info[open] summary:before { content:"Details ▾ "; }
+  .info-body { font-size:0.85rem; color:var(--muted); line-height:1.5; margin-top:6px; }
+  .info-body p { margin:0 0 8px; }
+  .info-body b { color:var(--text); }
+  .add-custom-row { display:flex; gap:6px; margin-top:8px; }
+  .add-custom-row input { flex:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Cue Sheet</h1>
+  <div class="status" id="statusLine">Connecting…</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="setlist">Set List</button>
+    <button class="tab" data-tab="library">Game Library</button>
+    <button class="tab" data-tab="showsheet">Show Sheet</button>
+  </div>
+</header>
+<main>
+
+  <section id="panel-setlist" class="panel active">
+    <div class="row gen-row">
+      <select id="patternSelect"></select>
+    </div>
+    <div class="row" style="margin-bottom:16px;">
+      <button class="primary" id="generateBtn" style="flex:1;">Generate set list</button>
+    </div>
+    <div id="slotsOut"></div>
+    <button class="primary" id="finalizeBtn" style="width:100%; margin-top:16px;">Finalize set list \u2192 Show Sheet</button>
+  </section>
+
+  <section id="panel-showsheet" class="panel">
+    <div class="row" style="justify-content:space-between; margin-bottom:12px;">
+      <h2 class="section" style="margin:0;">Show Sheet</h2>
+      <div class="row" style="gap:6px; width:auto;">
+        <button class="ghost" id="exportPdfBtn">Export PDF</button>
+        <button class="ghost" id="clearSheetBtn">Clear</button>
+      </div>
+    </div>
+    <div id="showSheetOut"></div>
+  </section>
+
+  <section id="panel-library" class="panel">
+    <div class="form-card">
+      <h3 id="formTitle">Add a game</h3>
+      <div class="field">
+        <label for="gName">Name</label>
+        <input type="text" id="gName" placeholder="e.g. Freeze Tag">
+      </div>
+      <div class="field">
+        <label>Categories (pick as many as apply)</label>
+        <div class="subcat-chips" id="catChips"></div>
+        <div class="add-custom-row">
+          <input type="text" id="catCustom" placeholder="Write in a new category">
+          <button type="button" id="addCatBtn">Add</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="gPlayers">Number of players</label>
+        <input type="text" id="gPlayers" placeholder="e.g. 3-5, or 4">
+      </div>
+      <div class="field">
+        <label for="gDesc">Description</label>
+        <textarea id="gDesc" placeholder="How the game is played"></textarea>
+      </div>
+      <div class="field">
+        <label for="gBest">Best practices</label>
+        <textarea id="gBest" placeholder="Tips for running it well"></textarea>
+      </div>
+      <div class="field">
+        <label for="gFunny">What makes it funny</label>
+        <textarea id="gFunny" placeholder="Where the laughs tend to come from"></textarea>
+      </div>
+      <button class="primary" id="addGameBtn" style="width:100%;">Add game</button>
+      <button class="ghost" id="cancelEditBtn" style="width:100%; margin-top:8px; display:none;">Cancel edit</button>
+      <div class="warn" id="addWarn" style="display:none;"></div>
+    </div>
+
+    <h2 class="section">Your games</h2>
+    <div class="row lib-filter">
+      <select id="libFilter"></select>
+    </div>
+    <div id="libOut"></div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCcfuw_aXXMZYF5Xbq5CX5Qlqw4NagcIbM",
+  authDomain: "improv-set-list-generator.firebaseapp.com",
+  projectId: "improv-set-list-generator",
+  storageBucket: "improv-set-list-generator.firebasestorage.app",
+  messagingSenderId: "872511104722",
+  appId: "1:872511104722:web:09d52546ca6b08ae78af0b",
+  measurementId: "G-G75B5012ET"
+};
+const fbApp = initializeApp(firebaseConfig);
+const fdb = getFirestore(fbApp);
+const fauth = getAuth(fbApp);
+
+const LOCAL_KEY = 'improvSetBuilder.v2';
+const BASE_CATEGORIES = ['all-play','scenic','gimmick','pun','guessing','protect-the-line'];
+const CAT_LABELS = {
+  'all-play':'All Play', 'scenic':'Scenic', 'gimmick':'Gimmick', 'pun':'Pun',
+  'guessing':'Guessing', 'protect-the-line':'Protect the Line'
+};
+function catLabel(id) { return CAT_LABELS[id] || id; }
+
+const STARTER_GAMES = [
+  { name: "World's Worst", categories: ['all-play'], playerCount: 'Full Ensemble', description: "Rapid-fire line-up game where performers step up to deliver quick-hit snippets of the \"world's worst\" person, profession, or archetype based on an audience suggestion.", bestPractices: 'Keep it punchy. One joke/beat per step-out, tag back quickly, and listen to the line to avoid repeating premises.', funnyWhy: 'Rapid speed, hyperbole, and the stark contrast between professional expectations and absurd behavior.' },
+  { name: 'Hitchhiker', categories: ['all-play'], playerCount: 'Full Ensemble (4 in the car at a time, 6-9 rotating)', description: 'Four chairs represent a car. As new hitchhikers enter with hyper-specific emotional or physical quirks, everyone in the car adopts that exact quirk until a passenger gets dropped off.', bestPractices: 'Adopt the new quirk instantly and with 100% commitment. Find a reason for the driver to leave.', funnyWhy: 'The contagious, group-wide spread of unhinged behavior and dynamic mood swings inside a cramped space.' },
+  { name: 'Freeze Tag', categories: ['all-play'], playerCount: 'Full Ensemble', description: 'Two actors start a physical scene; any off-stage performer yells "Freeze!", tags an actor out, assumes their physical pose, and launches a completely new scene.', bestPractices: 'Freeze players in dynamic, contorted physical poses (avoid just standing straight), and justify those physical positions immediately in the new reality.', funnyWhy: 'Recontextualizing strange physical poses into totally unrelated scenarios.' },
+  { name: 'Jimmy the Pigeon', categories: ['pun'], playerCount: 'Full Ensemble', description: 'Performers take an audience suggestion and step up to deliver rapid-fire puns using the mandatory setup: "You hear about Jimmy the [blank]? He \u2026" in a thick, exaggerated New York accent.', bestPractices: 'Commit to the New York accent, keep the setups snappy, and go for cheesy puns.', funnyWhy: 'The contrast between a classic, tough-talking New Yorker and goofy wordplay.' },
+  { name: 'Garth Brooks', categories: ['pun'], playerCount: 'Full Ensemble', description: "Performers take a celebrity suggestion from the audience and step up to deliver rapid-fire puns by slightly altering the celebrity's name.", bestPractices: 'Keep the name change close enough to the original sound.', funnyWhy: 'Absurdity of turning high-profile celebrities into goofy, hyper-specific wordplay.' },
+  { name: 'A Date with Me', categories: ['pun'], playerCount: 'Full Ensemble', description: 'Performers use an audience suggestion (object, place, or concept) to describe themselves as a romantic partner using the setup: "A date with me is like [suggestion]..."', bestPractices: 'Confidence in delivery. Keeping puns suggestive, but not explicit.', funnyWhy: 'Self-deprecating humor, brutal honesty, tropes, stereotypes, and hyperbolic claims.' },
+  { name: 'Chain Murder', categories: ['guessing'], playerCount: '4 players', description: 'A telephone game where the place, occupation, and weapon of a murder are passed down performer by performer through mime and gibberish until the final player guesses them aloud.', bestPractices: 'Use hyper-specific physical mime and distinct, different movements than what was communicated to you.', funnyWhy: 'Watching a simple clue morph into nonsense by the time it reaches the third player OR having a complex clue be communicated effectively all the way through.' },
+  { name: 'Historical Ballet', categories: ['guessing'], playerCount: '3\u20135 players (1 Guesser, 2\u20134 Dancers)', description: 'Performers enact a historical event purely through dramatic, non-verbal interpretive dance movements while an off-stage player/audience member tries to identify the moment in history.', bestPractices: 'Execute movements with commitment.', funnyWhy: 'Clash between fine-art dance and chaotic historical events or clumsy physical interpretations.' },
+  { name: 'Party Quirks', categories: ['guessing'], playerCount: '4 players (1 Host, 3 Guests)', description: 'A party host welcomes three guests who each possess secret, absurd character traits or identities provided by the audience. The host must deduce who they are through conversation.', bestPractices: 'Guests should interact with each other to drop contextual clues naturally rather than staring down the host with explicit hints.', funnyWhy: "The host's genuine confusion while guests act out unhinged identities right in front of them." },
+  { name: 'Four Square', categories: ['scenic'], playerCount: '4 players', description: 'Four performers stand in a 2x2 grid representing four distinct two-person scenes. Rotating the grid changes which scene is active in the front spot.', bestPractices: 'Remember your exact physical pose, character state, and relationship so you can drop back into your corner instantaneously.', funnyWhy: 'Sharp tonal shifts between scenes and clever callbacks across different grid corners.' },
+  { name: 'Oscar Winning Moment', categories: ['scenic'], playerCount: '2\u20133 players', description: 'A scene unfolds naturally until the host demands an "Oscar Winning Moment!", prompting an actor to deliver an over-the-top, melodramatic monologue.', bestPractices: 'Keep the base scene low-stakes so the dramatic monologue feels comically unearned and intense.', funnyWhy: 'Sudden, explosive emotional reaction over mundane everyday problems.' },
+  { name: 'Dance Party USA', categories: ['scenic'], playerCount: '4-9 players', description: 'High-energy dance breaks erupt whenever music hits. When the music pauses, performers freeze, and the host picks performers to continue a scene with dialogue, starting from their pose.', bestPractices: 'Fully commit to dancing. Host should seek to pair the most unique poses for scenework.', funnyWhy: 'Casual scenes starting from dynamic poses.' },
+  { name: 'Can Do Better', categories: ['scenic'], playerCount: '3\u20139 players', description: 'An offstage caller interrupts a scene to redo a line or choice because they "can do better," escalating the scene\'s intensity each time.', bestPractices: 'Commit to bolder choices, higher emotional stakes, or wilder justifications. Find a rhythm with the interruptions.', funnyWhy: 'Performers scrambling to justify increasingly bizarre choices in real-time under pressure.' },
+  { name: 'Fairy Tale News', categories: ['gimmick'], playerCount: '4\u20136 players', description: 'News anchors and field reporters cover breaking news incidents occurring inside classic fairy tales and fables.', bestPractices: 'Maintain professional broadcast news decorum while reporting on fantasy chaos. Host receives a one-sentence description of a fairy tale as a suggestion.', funnyWhy: 'Serious news coverage applied to fairy tale tropes.' },
+  { name: 'Themed Restaurant', categories: ['gimmick'], playerCount: '4\u20136 players', description: "Customers try to have a normal meal at a hyper-themed restaurant where the waitstaff aggressively enforces the theme's rules on every order.", bestPractices: 'Establish normal dining beats (menus, ordering, getting the bill) so the gimmick disrupts the routine cleanly.', funnyWhy: 'Commitment to an inconvenient, bizarre dining theme.' }
+];
+async function seedStarterGames() {
+  await Promise.all(STARTER_GAMES.map(g => addDoc(collection(fdb, 'games'), g).catch(()=>{})));
+}
+
+function defaultPattern() {
+  return {
+    id: 'default', name: '5 games · ~20 min', order: 1,
+    slots: [
+      { id:'s1', label:'Opener', type:'all-play', sub:'any', differFrom:null },
+      { id:'s2', label:'Small Cast', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing' },
+      { id:'s3', label:'Palate Cleanser', type:'all-play', sub:'any', differFrom:null },
+      { id:'s4', label:'Small Cast', type:'small-cast', sub:'any', differFrom:'s2', excludeSub:'guessing' },
+      { id:'s5', label:'Closer', type:'any', sub:'pun', differFrom:null }
+    ]
+  };
+}
+function thirtyMinPattern() {
+  return {
+    id: 'thirty-min', name: '7 games · ~30 min', order: 2,
+    slots: [
+      { id:'t1', label:'Opener', type:'all-play', sub:'any', differFrom:null },
+      { id:'t2', label:'Small Cast', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing' },
+      { id:'t3', label:'Small Cast (Guessing)', type:'small-cast', sub:'guessing', differFrom:null },
+      { id:'t4', label:'Middle All-Play', type:'all-play', sub:'any', differFrom:null },
+      { id:'t5', label:'Small Cast', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing' },
+      { id:'t6', label:'Small Cast', type:'small-cast', sub:'any', differFrom:'t2', excludeSub:'guessing' },
+      { id:'t7', label:'Closer', type:'any', sub:'pun', differFrom:null }
+    ]
+  };
+}
+function fortyMinPattern() {
+  return {
+    id: 'forty-min', name: '9 games · ~40 min', order: 3,
+    slots: [
+      { id:'p1', label:'Opener', type:'all-play', sub:'any', differFrom:null },
+      { id:'p2', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
+      { id:'p3', label:'Small Cast (Gimmick)', type:'small-cast', sub:'gimmick', differFrom:null },
+      { id:'p4', label:'Small Cast (Guessing)', type:'small-cast', sub:'guessing', differFrom:null },
+      { id:'p5', label:'Middle All-Play', type:'all-play', sub:'any', differFrom:null },
+      { id:'p6', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
+      { id:'p7', label:'Small Cast (Gimmick)', type:'small-cast', sub:'gimmick', differFrom:null },
+      { id:'p8', label:'Flex (if time allows)', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing', optional:true },
+      { id:'p9', label:'Closer', type:'any', sub:'pun', differFrom:null }
+    ]
+  };
+}
+function sixtyMinPattern() {
+  return {
+    id: 'sixty-min', name: '10 games · ~60 min', order: 4,
+    slots: [
+      { id:'u1', label:'Opener', type:'all-play', sub:'any', differFrom:null },
+      { id:'u2', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
+      { id:'u3', label:'Small Cast (Gimmick)', type:'small-cast', sub:'gimmick', differFrom:null },
+      { id:'u4', label:'Small Cast (Guessing)', type:'small-cast', sub:'guessing', differFrom:null },
+      { id:'u5', label:'Middle All-Play', type:'all-play', sub:'any', differFrom:null },
+      { id:'u6', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
+      { id:'u7', label:'Small Cast (Gimmick)', type:'small-cast', sub:'gimmick', differFrom:null },
+      { id:'u8', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
+      { id:'u9', label:'Flex \u2014 possible 2nd Guessing (if time allows)', type:'small-cast', sub:'any', differFrom:null, optional:true },
+      { id:'u10', label:'Closer', type:'any', sub:'pun', differFrom:null }
+    ]
+  };
+}
+const STARTER_PATTERNS = [defaultPattern(), thirtyMinPattern(), fortyMinPattern(), sixtyMinPattern()];
+async function seedStarterPatterns() {
+  await Promise.all(STARTER_PATTERNS.map(p => {
+    const data = Object.assign({}, p); delete data.id;
+    return setDoc(doc(fdb, 'patterns', p.id), data).catch(()=>{});
+  }));
+}
+
+let mode = 'local'; // 'db' (Firebase) or 'local' (localStorage fallback)
+let games = [];
+let patterns = [defaultPattern()];
+let meta = { activePatternId: 'default', currentSet: null };
+
+let excludedIds = new Set();
+let excludeMode = 'local'; // 'user-doc' or 'local'
+const EXCLUDE_LOCAL_KEY = 'improvSetBuilder.excluded.v1';
+function loadExcludedLocal() {
+  try {
+    const raw = localStorage.getItem(EXCLUDE_LOCAL_KEY);
+    excludedIds = new Set(raw ? JSON.parse(raw) : []);
+  } catch(e) { excludedIds = new Set(); }
+}
+function saveExcludedLocal() {
+  try { localStorage.setItem(EXCLUDE_LOCAL_KEY, JSON.stringify(Array.from(excludedIds))); } catch(e) {}
+}
+
+let finalizedRows = []; // [{id, order, slotLabel, gameName, host, players}]
+const FINALIZED_LOCAL_KEY = 'improvSetBuilder.finalized.v1';
+function loadFinalizedLocal() {
+  try {
+    const raw = localStorage.getItem(FINALIZED_LOCAL_KEY);
+    finalizedRows = raw ? JSON.parse(raw) : [];
+  } catch(e) { finalizedRows = []; }
+}
+function saveFinalizedLocal() {
+  try { localStorage.setItem(FINALIZED_LOCAL_KEY, JSON.stringify(finalizedRows)); } catch(e) {}
+}
+
+function uid() { return Math.random().toString(36).slice(2,9); }
+function escapeHtml(s) { const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+
+function normalizeGame(g) {
+  let categories = Array.isArray(g.categories) ? g.categories.slice() : [];
+  if (!categories.length && g.type) {
+    if (g.type === 'all-play') categories.push('all-play');
+    if (g.sub) categories.push(g.sub);
+  }
+  return Object.assign({}, g, { categories });
+}
+function gameType(g) { return (g.categories||[]).includes('all-play') ? 'all-play' : 'small-cast'; }
+function allCategories() {
+  const s = new Set(BASE_CATEGORIES);
+  games.forEach(g => (g.categories||[]).forEach(c => s.add(c)));
+  return Array.from(s);
+}
+
+/* ---------- persistence adapters ---------- */
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      games = (parsed.games || []).map(normalizeGame);
+      meta = parsed.meta || { activePatternId:'default', currentSet:null };
+    }
+  } catch(e) {}
+}
+function saveLocal() {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify({ games, meta })); } catch(e) {}
+}
+
+async function addGame(g) {
+  if (mode === 'db') {
+    await addDoc(collection(fdb, 'games'), g);
+  } else {
+    g.id = uid();
+    games.push(normalizeGame(g));
+    saveLocal();
+    renderLibrary();
+  }
+}
+async function deleteGame(id) {
+  if (mode === 'db') {
+    await deleteDoc(doc(fdb, 'games', id));
+  } else {
+    games = games.filter(g => g.id !== id);
+    saveLocal();
+    renderLibrary();
+  }
+}
+async function updateGame(id, g) {
+  if (mode === 'db') {
+    await setDoc(doc(fdb, 'games', id), g);
+  } else {
+    const idx = games.findIndex(x => x.id === id);
+    if (idx > -1) {
+      games[idx] = normalizeGame(Object.assign({ id }, g));
+      saveLocal();
+      renderLibrary();
+    }
+  }
+}
+function toggleExclude(id, checked) {
+  if (checked) excludedIds.add(id); else excludedIds.delete(id);
+  if (excludeMode === 'user-doc' && currentUid) {
+    setDoc(doc(fdb, 'userPrefs', currentUid), { excludedGameIds: Array.from(excludedIds) }).catch(()=>{});
+  } else {
+    saveExcludedLocal();
+  }
+  renderLibrary();
+}
+async function persistMeta(newMeta) {
+  meta = newMeta;
+  if (mode === 'db') {
+    await setDoc(doc(fdb, 'meta', 'app'), newMeta);
+  } else {
+    saveLocal();
+    renderAll();
+  }
+}
+
+/* ---------- init ---------- */
+let downloadsCap = null; // no claude.ai capability here; PDF export falls back to a plain browser download
+let currentUid = null;
+
+async function init() {
+  document.getElementById('statusLine').textContent = 'Connecting\u2026';
+
+  try {
+    await new Promise((resolve) => {
+      onAuthStateChanged(fauth, user => {
+        if (user) { currentUid = user.uid; resolve(); }
+      });
+      signInAnonymously(fauth).catch(() => resolve());
+    });
+  } catch(e) {}
+
+  if (!currentUid) {
+    mode = 'local';
+    excludeMode = 'local';
+    loadExcludedLocal();
+    loadFinalizedLocal();
+    document.getElementById('statusLine').textContent = 'Working on this device only \u2014 couldn\u2019t connect to Firebase';
+    loadLocal();
+    renderPatternSelect();
+    renderAll();
+    return;
+  }
+
+  mode = 'db';
+  document.getElementById('statusLine').textContent = 'Shared with everyone who opens this page';
+
+  onSnapshot(collection(fdb, 'games'), async snap => {
+    if (snap.empty) {
+      try { await seedStarterGames(); } catch(e) {}
+      return;
+    }
+    games = snap.docs.map(d => normalizeGame(Object.assign({ id: d.id }, d.data())));
+    renderLibrary();
+    renderFromMeta();
+  }, () => { document.getElementById('statusLine').textContent = 'Connection lost \u2014 reload to reconnect'; });
+
+  onSnapshot(collection(fdb, 'patterns'), async snap => {
+    if (snap.empty) {
+      try { await seedStarterPatterns(); } catch(e) {}
+      return;
+    }
+    patterns = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    renderPatternSelect();
+  });
+
+  onSnapshot(doc(fdb, 'meta', 'app'), snap => {
+    meta = snap.exists() ? snap.data() : { activePatternId:'default', currentSet:null };
+    renderPatternSelect();
+    renderFromMeta();
+  });
+
+  onSnapshot(collection(fdb, 'finalizedRows'), snap => {
+    finalizedRows = snap.docs.map(d => Object.assign({ id: d.id }, d.data())).sort((a,b) => (a.order||0)-(b.order||0));
+    renderShowSheet();
+  }, () => {});
+
+  excludeMode = 'user-doc';
+  onSnapshot(doc(fdb, 'userPrefs', currentUid), snap => {
+    const data = snap.exists() ? snap.data() : null;
+    excludedIds = new Set(data && Array.isArray(data.excludedGameIds) ? data.excludedGameIds : []);
+    renderLibrary();
+  }, () => {});
+}
+
+function renderAll() { renderLibrary(); renderFromMeta(); renderShowSheet(); }
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'library') renderLibrary();
+    if (btn.dataset.tab === 'showsheet') renderShowSheet();
+  });
+});
+
+/* ---------- Add game form ---------- */
+let pendingCats = new Set();
+function renderCatChips() {
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML = '';
+  allCategories().forEach(c => {
+    const b = document.createElement('button');
+    b.type='button'; b.className='chip'; b.dataset.cat=c; b.textContent=catLabel(c);
+    if (pendingCats.has(c)) b.classList.add('selected');
+    wrap.appendChild(b);
+  });
+}
+document.getElementById('catChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  const c = b.dataset.cat;
+  if (pendingCats.has(c)) pendingCats.delete(c); else pendingCats.add(c);
+  renderCatChips();
+});
+document.getElementById('addCatBtn').addEventListener('click', () => {
+  const input = document.getElementById('catCustom');
+  const val = input.value.trim().toLowerCase().replace(/\s+/g,'-');
+  if (!val) return;
+  pendingCats.add(val);
+  if (!allCategories().includes(val)) {
+    games; // no-op, allCategories derives live from games + BASE; custom shows via pendingCats union below
+  }
+  input.value = '';
+  renderCatChipsWithPending();
+});
+function renderCatChipsWithPending() {
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML = '';
+  const cats = new Set(allCategories());
+  pendingCats.forEach(c => cats.add(c));
+  Array.from(cats).forEach(c => {
+    const b = document.createElement('button');
+    b.type='button'; b.className='chip'; b.dataset.cat=c; b.textContent=catLabel(c);
+    if (pendingCats.has(c)) b.classList.add('selected');
+    wrap.appendChild(b);
+  });
+}
+
+document.getElementById('addGameBtn').addEventListener('click', async () => {
+  const name = document.getElementById('gName').value.trim();
+  const playerCount = document.getElementById('gPlayers').value.trim();
+  const description = document.getElementById('gDesc').value.trim();
+  const bestPractices = document.getElementById('gBest').value.trim();
+  const funnyWhy = document.getElementById('gFunny').value.trim();
+  const categories = Array.from(pendingCats);
+  const warn = document.getElementById('addWarn');
+  if (!name || !categories.length) {
+    warn.style.display = 'block';
+    warn.textContent = 'Add a name and pick at least one category.';
+    return;
+  }
+  warn.style.display = 'none';
+  const btn = document.getElementById('addGameBtn');
+  btn.disabled = true;
+  try {
+    if (editingId) {
+      await updateGame(editingId, { name, categories, playerCount, description, bestPractices, funnyWhy });
+    } else {
+      await addGame({ name, categories, playerCount, description, bestPractices, funnyWhy });
+    }
+    resetForm();
+    if (mode === 'db') renderLibrary();
+  } catch(e) {
+    warn.style.display = 'block';
+    warn.textContent = 'Couldn\u2019t save \u2014 try again.';
+  }
+  btn.disabled = false;
+});
+
+let editingId = null;
+function resetForm() {
+  editingId = null;
+  document.getElementById('formTitle').textContent = 'Add a game';
+  document.getElementById('addGameBtn').textContent = 'Add game';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('gName').value = '';
+  document.getElementById('gPlayers').value = '';
+  document.getElementById('gDesc').value = '';
+  document.getElementById('gBest').value = '';
+  document.getElementById('gFunny').value = '';
+  pendingCats = new Set();
+  renderCatChips();
+}
+function startEdit(g) {
+  editingId = g.id;
+  document.getElementById('formTitle').textContent = 'Edit game';
+  document.getElementById('addGameBtn').textContent = 'Save changes';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('gName').value = g.name || '';
+  document.getElementById('gPlayers').value = g.playerCount || '';
+  document.getElementById('gDesc').value = g.description || '';
+  document.getElementById('gBest').value = g.bestPractices || '';
+  document.getElementById('gFunny').value = g.funnyWhy || '';
+  pendingCats = new Set(g.categories || []);
+  renderCatChips();
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[data-tab="library"]').classList.add('active');
+  document.getElementById('panel-library').classList.add('active');
+  document.getElementById('gName').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+/* ---------- Library list ---------- */
+document.getElementById('libFilter').addEventListener('change', renderLibrary);
+function infoBlock(g) {
+  if (!g.description && !g.bestPractices && !g.funnyWhy) return '';
+  let body = '';
+  if (g.description) body += '<p><b>How it\u2019s played:</b> ' + escapeHtml(g.description) + '</p>';
+  if (g.bestPractices) body += '<p><b>Best practices:</b> ' + escapeHtml(g.bestPractices) + '</p>';
+  if (g.funnyWhy) body += '<p><b>What makes it funny:</b> ' + escapeHtml(g.funnyWhy) + '</p>';
+  return '<details class="info"><summary></summary><div class="info-body">' + body + '</div></details>';
+}
+function matchesFilter(g, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'small-cast') return gameType(g) === 'small-cast';
+  return (g.categories||[]).includes(filter);
+}
+function renderLibFilterOptions() {
+  const sel = document.getElementById('libFilter');
+  const prev = sel.value || 'all';
+  sel.innerHTML = '';
+  [['all','All games'], ['all-play','All-play only'], ['small-cast','Small cast only']].forEach(([v,l]) => {
+    const o = document.createElement('option'); o.value = v; o.textContent = l; sel.appendChild(o);
+  });
+  allCategories().filter(c => c !== 'all-play').forEach(c => {
+    const o = document.createElement('option'); o.value = c; o.textContent = catLabel(c); sel.appendChild(o);
+  });
+  const values = Array.from(sel.options).map(o => o.value);
+  sel.value = values.includes(prev) ? prev : 'all';
+}
+function renderLibrary() {
+  renderCatChips();
+  renderLibFilterOptions();
+  const filter = document.getElementById('libFilter').value;
+  const out = document.getElementById('libOut');
+  const list = games.filter(g => matchesFilter(g, filter)).sort((a,b) => a.name.localeCompare(b.name));
+  if (!list.length) {
+    out.innerHTML = '<div class="empty">No games yet. Add your troupe\u2019s games above \u2014 tag each with every category that fits, like all-play, pun, or scenic.</div>';
+    return;
+  }
+  out.innerHTML = '';
+  list.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'lib-item' + (excludedIds.has(g.id) ? ' excluded' : '');
+    const tags = (g.categories||[]).map(c => {
+      const cls = c==='all-play' ? 'allplay' : (c==='pun' ? 'pun' : '');
+      return '<span class="tag ' + cls + '">' + escapeHtml(catLabel(c)) + '</span>';
+    }).join('') + (g.playerCount ? '<span class="tag">' + escapeHtml(g.playerCount) + ' players</span>' : '');
+    div.innerHTML = `<div class="lib-top">
+        <div>
+          <div class="lib-name">${escapeHtml(g.name)}</div>
+          <div class="slot-tags">${tags}</div>
+        </div>
+        <div class="row" style="gap:6px;">
+          <button class="ghost icon" data-edit="${g.id}">✎</button>
+          <button class="ghost icon" data-del="${g.id}">✕</button>
+        </div>
+      </div>
+      ${infoBlock(g)}
+      <label class="include-toggle"><input type="checkbox" data-exclude="${g.id}" ${excludedIds.has(g.id)?'checked':''}> Exclude for just me</label>`;
+    out.appendChild(div);
+  });
+  out.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', () => deleteGame(b.dataset.del));
+  });
+  out.querySelectorAll('[data-edit]').forEach(b => {
+    b.addEventListener('click', () => {
+      const g = games.find(x => x.id === b.dataset.edit);
+      if (g) startEdit(g);
+    });
+  });
+  out.querySelectorAll('[data-exclude]').forEach(cb => {
+    cb.addEventListener('change', () => toggleExclude(cb.dataset.exclude, cb.checked));
+  });
+}
+
+/* ---------- Pattern select ---------- */
+function currentPattern() {
+  return patterns.find(p => p.id === meta.activePatternId) || patterns[0];
+}
+function renderPatternSelect() {
+  const sel = document.getElementById('patternSelect');
+  sel.innerHTML = '';
+  const sorted = patterns.slice().sort((a,b) => {
+    const ao = (typeof a.order === 'number') ? a.order : a.slots.length;
+    const bo = (typeof b.order === 'number') ? b.order : b.slots.length;
+    return ao - bo;
+  });
+  sorted.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id; o.textContent = p.name;
+    if (p.id === (meta.activePatternId || 'default')) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+document.getElementById('patternSelect').addEventListener('change', e => {
+  persistMeta({ activePatternId: e.target.value, currentSet: null });
+});
+
+/* ---------- Generate ---------- */
+function poolFor(slot, used, chosenBySlot) {
+  return games.filter(g => {
+    if (excludedIds.has(g.id)) return false;
+    if (used.has(g.id)) return false;
+    const t = gameType(g);
+    if (slot.type !== 'any' && t !== slot.type) return false;
+    if (slot.sub !== 'any' && !(g.categories||[]).includes(slot.sub)) return false;
+    if (slot.excludeSub && (g.categories||[]).includes(slot.excludeSub)) return false;
+    if (slot.sub !== 'pun' && (g.categories||[]).includes('pun')) return false;
+    if (slot.differFrom) {
+      const other = chosenBySlot[slot.differFrom];
+      if (other) {
+        const overlap = (g.categories||[]).some(c => (other.categories||[]).includes(c));
+        if (overlap) return false;
+      }
+    }
+    return true;
+  });
+}
+function slotCandidates(slot) {
+  const comboSubs = (slot.sub === 'scenic' || slot.sub === 'gimmick') ? ['scenic','gimmick'] : null;
+  return games.filter(g => {
+    if (excludedIds.has(g.id)) return false;
+    const t = gameType(g);
+    if (slot.type !== 'any' && t !== slot.type) return false;
+    if (slot.sub !== 'any') {
+      if (comboSubs) {
+        if (!comboSubs.some(c => (g.categories||[]).includes(c))) return false;
+      } else if (!(g.categories||[]).includes(slot.sub)) return false;
+    }
+    if (slot.excludeSub && (g.categories||[]).includes(slot.excludeSub)) return false;
+    if (slot.sub !== 'pun' && (g.categories||[]).includes('pun')) return false;
+    return true;
+  }).sort((a,b) => a.name.localeCompare(b.name));
+}
+function computeResults(pattern) {
+  const used = new Set();
+  const chosenBySlot = {};
+  const results = [];
+  pattern.slots.forEach(slot => {
+    const pool = poolFor(slot, used, chosenBySlot);
+    if (!pool.length) {
+      results.push({ slotLabel: slot.label, slotType: slot.type, slotSub: slot.sub, fail: true });
+      return;
+    }
+    const pick = pool[Math.floor(Math.random()*pool.length)];
+    used.add(pick.id);
+    chosenBySlot[slot.id] = pick;
+    results.push({ slotId: slot.id, slotLabel: slot.label, slotType: slot.type, slotSub: slot.sub,
+      gameId: pick.id, gameName: pick.name, categories: pick.categories, playerCount: pick.playerCount,
+      description: pick.description, bestPractices: pick.bestPractices, funnyWhy: pick.funnyWhy, fail: false,
+      optional: !!slot.optional, included: !slot.optional });
+  });
+  return results;
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const pattern = currentPattern();
+  const results = computeResults(pattern);
+  persistMeta({ activePatternId: pattern.id, currentSet: results, generatedAt: Date.now() });
+});
+
+function reroll(index) {
+  const current = (meta.currentSet || []).slice();
+  const pattern = currentPattern();
+  const slot = pattern.slots[index];
+  if (!slot) return;
+  const used = new Set(current.filter((r,i)=> i!==index && r.gameId).map(r=>r.gameId));
+  const chosenBySlot = {};
+  pattern.slots.forEach((s,i) => { if (current[i] && current[i].gameId) {
+    chosenBySlot[s.id] = { categories: current[i].categories || [] };
+  }});
+  let pool = poolFor(slot, used, chosenBySlot);
+  if (!pool.length) return;
+  const pick = pool[Math.floor(Math.random()*pool.length)];
+  const prevIncluded = current[index] ? current[index].included : !slot.optional;
+  current[index] = { slotId: slot.id, slotLabel: slot.label, slotType: slot.type, slotSub: slot.sub,
+    gameId: pick.id, gameName: pick.name, categories: pick.categories, playerCount: pick.playerCount,
+    description: pick.description, bestPractices: pick.bestPractices, funnyWhy: pick.funnyWhy, fail: false,
+    optional: !!slot.optional, included: prevIncluded };
+  persistMeta(Object.assign({}, meta, { currentSet: current }));
+}
+
+function chooseGame(index, gameId) {
+  const current = (meta.currentSet || []).slice();
+  const pattern = currentPattern();
+  const slot = pattern.slots[index];
+  const pick = games.find(g => g.id === gameId);
+  if (!slot || !pick) return;
+  const prevIncluded = current[index] ? current[index].included : !slot.optional;
+  current[index] = { slotId: slot.id, slotLabel: slot.label, slotType: slot.type, slotSub: slot.sub,
+    gameId: pick.id, gameName: pick.name, categories: pick.categories, playerCount: pick.playerCount,
+    description: pick.description, bestPractices: pick.bestPractices, funnyWhy: pick.funnyWhy, fail: false,
+    optional: !!slot.optional, included: prevIncluded };
+  persistMeta(Object.assign({}, meta, { currentSet: current }));
+}
+
+function toggleInclude(index, checked) {
+  const current = (meta.currentSet || []).slice();
+  if (!current[index]) return;
+  current[index] = Object.assign({}, current[index], { included: checked });
+  persistMeta(Object.assign({}, meta, { currentSet: current }));
+}
+
+function moveSlot(index, dir) {
+  const current = (meta.currentSet || []).slice();
+  const target = index + dir;
+  if (target < 0 || target >= current.length) return;
+  const tmp = current[index];
+  current[index] = current[target];
+  current[target] = tmp;
+  persistMeta(Object.assign({}, meta, { currentSet: current }));
+}
+
+function renderFromMeta() {
+  const out = document.getElementById('slotsOut');
+  const set = meta.currentSet;
+  if (!set) {
+    out.innerHTML = games.length
+      ? '<div class="empty">Tap Generate set list to build your show.</div>'
+      : '<div class="empty">Add a few games in the Game Library tab, then come back here to generate a set list.</div>';
+    return;
+  }
+  out.innerHTML = '';
+  const pattern = currentPattern();
+  set.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'slot' + (r.optional && !r.included ? ' excluded' : '');
+    if (r.fail) {
+      div.innerHTML = `<div class="slot-top"><div><div class="slot-label">${escapeHtml(r.slotLabel)}</div><div class="msg">No match \u2014 add games for this slot</div></div></div>`;
+    } else {
+      const tags = (r.categories||[]).map(c => {
+        const cls = c==='all-play' ? 'allplay' : (c==='pun' ? 'pun' : '');
+        return '<span class="tag ' + cls + '">' + escapeHtml(catLabel(c)) + '</span>';
+      }).join('') + (r.playerCount ? '<span class="tag">' + escapeHtml(r.playerCount) + ' players</span>' : '');
+      const slotDef = pattern.slots[i];
+      const candidates = slotDef ? slotCandidates(slotDef) : [];
+      const options = candidates.map(g => `<option value="${g.id}"${g.id===r.gameId?' selected':''}>${escapeHtml(g.name)}</option>`).join('');
+      const includeRow = r.optional ? `<label class="include-toggle"><input type="checkbox" data-include="${i}" ${r.included?'checked':''}> Include in this show</label>` : '';
+      div.innerHTML = `<div class="slot-top">
+          <div>
+            <div class="slot-label">${escapeHtml(r.slotLabel)}</div>
+            <div class="slot-game">${escapeHtml(r.gameName)}</div>
+            <div class="slot-tags">${tags}</div>
+          </div>
+          <button class="icon ghost" data-reroll="${i}" title="Random reroll">⟳</button>
+        </div>
+        ${infoBlock(r)}
+        <div class="slot-controls">
+          <div class="move-btns">
+            <button class="icon ghost" data-up="${i}" ${i===0?'disabled':''} title="Move up">↑</button>
+            <button class="icon ghost" data-down="${i}" ${i===set.length-1?'disabled':''} title="Move down">↓</button>
+          </div>
+          <select data-choose="${i}"><option value="">Choose a specific game\u2026</option>${options}</select>
+        </div>
+        ${includeRow}`;
+    }
+    out.appendChild(div);
+  });
+  out.querySelectorAll('[data-reroll]').forEach(b => {
+    b.addEventListener('click', () => reroll(parseInt(b.dataset.reroll)));
+  });
+  out.querySelectorAll('[data-up]').forEach(b => {
+    b.addEventListener('click', () => moveSlot(parseInt(b.dataset.up), -1));
+  });
+  out.querySelectorAll('[data-down]').forEach(b => {
+    b.addEventListener('click', () => moveSlot(parseInt(b.dataset.down), 1));
+  });
+  out.querySelectorAll('[data-choose]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      if (sel.value) chooseGame(parseInt(sel.dataset.choose), sel.value);
+    });
+  });
+  out.querySelectorAll('[data-include]').forEach(cb => {
+    cb.addEventListener('change', () => toggleInclude(parseInt(cb.dataset.include), cb.checked));
+  });
+}
+
+/* ---------- Show Sheet ---------- */
+async function finalizeSetList() {
+  const set = meta.currentSet || [];
+  const items = set.filter(r => !r.fail && (!r.optional || r.included));
+  if (!items.length) return;
+  const newRows = items.map((r, i) => ({ order: i, slotLabel: r.slotLabel, gameName: r.gameName, host: '', players: '' }));
+  if (mode === 'db') {
+    const old = finalizedRows.slice();
+    await Promise.all(old.map(row => deleteDoc(doc(fdb, 'finalizedRows', row.id)).catch(()=>{})));
+    await Promise.all(newRows.map((row, i) => setDoc(doc(fdb, 'finalizedRows', 'row-'+i), row).catch(()=>{})));
+  } else {
+    finalizedRows = newRows.map((row, i) => Object.assign({ id: 'row-'+i }, row));
+    saveFinalizedLocal();
+    renderShowSheet();
+  }
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[data-tab="showsheet"]').classList.add('active');
+  document.getElementById('panel-showsheet').classList.add('active');
+}
+async function clearShowSheet() {
+  if (mode === 'db') {
+    await Promise.all(finalizedRows.map(row => deleteDoc(doc(fdb, 'finalizedRows', row.id)).catch(()=>{})));
+  } else {
+    finalizedRows = [];
+    saveFinalizedLocal();
+    renderShowSheet();
+  }
+}
+async function updateFinalizedField(id, field, value) {
+  const idx = finalizedRows.findIndex(r => r.id === id);
+  if (idx === -1) return;
+  finalizedRows[idx] = Object.assign({}, finalizedRows[idx], { [field]: value });
+  if (mode === 'db') {
+    const data = {}; data[field] = value;
+    await updateDoc(doc(fdb, 'finalizedRows', id), data).catch(()=>{});
+  } else {
+    saveFinalizedLocal();
+  }
+}
+function renderShowSheet() {
+  const out = document.getElementById('showSheetOut');
+  if (!out) return;
+  if (!finalizedRows.length) {
+    out.innerHTML = '<div class="empty">No finalized set list yet. Generate a set you\u2019re happy with on the Set List tab, then tap \u201cFinalize set list.\u201d</div>';
+    return;
+  }
+  out.innerHTML = '';
+  finalizedRows.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'slot';
+    div.innerHTML = `<div class="slot-label">${escapeHtml(r.slotLabel||'')}</div>
+      <div class="slot-game">${escapeHtml(r.gameName||'')}</div>
+      <div class="field" style="margin-top:10px;">
+        <label>Host</label>
+        <input type="text" data-row="${r.id}" data-field="host" value="${escapeHtml(r.host||'')}" placeholder="Who\u2019s hosting">
+      </div>
+      <div class="field">
+        <label>Players</label>
+        <input type="text" data-row="${r.id}" data-field="players" value="${escapeHtml(r.players||'')}" placeholder="Who\u2019s playing">
+      </div>`;
+    out.appendChild(div);
+  });
+  out.querySelectorAll('input[data-row]').forEach(inp => {
+    inp.addEventListener('blur', () => updateFinalizedField(inp.dataset.row, inp.dataset.field, inp.value));
+  });
+}
+document.getElementById('finalizeBtn').addEventListener('click', finalizeSetList);
+document.getElementById('clearSheetBtn').addEventListener('click', clearShowSheet);
+document.getElementById('exportPdfBtn').addEventListener('click', exportShowSheetPdf);
+
+async function exportShowSheetPdf() {
+  if (!finalizedRows.length) return;
+  if (!window.jspdf) { alert('PDF export didn\u2019t load \u2014 try again in a moment.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const marginX = 14;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const usableWidth = pageWidth - marginX * 2;
+  const colGame = usableWidth * 0.42;
+  const colHost = usableWidth * 0.29;
+  const colPlayers = usableWidth - colGame - colHost;
+  const colX = [marginX, marginX + colGame, marginX + colGame + colHost];
+  const rowHeight = 10;
+  let y = 20;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('Improv Show Sheet', marginX, y);
+  y += 10;
+
+  function drawHeaderRow() {
+    doc.setFillColor(230, 230, 230);
+    doc.rect(marginX, y, usableWidth, rowHeight, 'F');
+    doc.setDrawColor(0);
+    doc.rect(marginX, y, usableWidth, rowHeight);
+    doc.line(colX[1], y, colX[1], y + rowHeight);
+    doc.line(colX[2], y, colX[2], y + rowHeight);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('Game', colX[0] + 2, y + 7);
+    doc.text('Host', colX[1] + 2, y + 7);
+    doc.text('Players', colX[2] + 2, y + 7);
+    y += rowHeight;
+  }
+
+  drawHeaderRow();
+
+  finalizedRows.forEach(r => {
+    if (y + rowHeight > 280) {
+      doc.addPage();
+      y = 20;
+      drawHeaderRow();
+    }
+    doc.setDrawColor(0);
+    doc.rect(marginX, y, usableWidth, rowHeight);
+    doc.line(colX[1], y, colX[1], y + rowHeight);
+    doc.line(colX[2], y, colX[2], y + rowHeight);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(String(r.gameName || ''), colX[0] + 2, y + 7, { maxWidth: colGame - 4 });
+    doc.text(String(r.host || ''), colX[1] + 2, y + 7, { maxWidth: colHost - 4 });
+    doc.text(String(r.players || ''), colX[2] + 2, y + 7, { maxWidth: colPlayers - 4 });
+    y += rowHeight;
+  });
+
+  const blob = doc.output('blob');
+  if (downloadsCap) {
+    try {
+      await downloadsCap.save({ filename: 'improv-show-sheet.pdf', data: blob });
+    } catch(e) {
+      if (e && e.code === 'declined') return;
+      alert('Couldn\u2019t save the PDF \u2014 try again.');
+    }
+  } else {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'improv-show-sheet.pdf';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+}
+
+renderCatChips();
+init();
+</script>
+</body>
+</html>
