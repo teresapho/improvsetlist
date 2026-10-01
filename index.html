@@ -233,7 +233,10 @@ const CAT_LABELS = {
   'all-play':'All Play', 'scenic':'Scenic', 'gimmick':'Gimmick', 'pun':'Pun',
   'guessing':'Guessing', 'protect-the-line':'Protect the Line'
 };
-function catLabel(id) { return CAT_LABELS[id] || id; }
+function catLabel(id) {
+  if (CAT_LABELS[id]) return CAT_LABELS[id];
+  return id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
 
 const STARTER_GAMES = [
   { name: "World's Worst", categories: ['all-play'], playerCount: 'Full Ensemble', description: "Rapid-fire line-up game where performers step up to deliver quick-hit snippets of the \"world's worst\" person, profession, or archetype based on an audience suggestion.", bestPractices: 'Keep it punchy. One joke/beat per step-out, tag back quickly, and listen to the line to avoid repeating premises.', funnyWhy: 'Rapid speed, hyperbole, and the stark contrast between professional expectations and absurd behavior.' },
@@ -277,7 +280,7 @@ function thirtyMinPattern() {
       { id:'t3', label:'Small Cast (Guessing)', type:'small-cast', sub:'guessing', differFrom:null },
       { id:'t4', label:'Middle All-Play', type:'all-play', sub:'any', differFrom:null },
       { id:'t5', label:'Small Cast', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing' },
-      { id:'t6', label:'Small Cast', type:'small-cast', sub:'any', differFrom:'t2', excludeSub:'guessing' },
+      { id:'t6', label:'Flex (if time allows)', type:'small-cast', sub:'any', differFrom:null, excludeSub:'guessing', optional:true },
       { id:'t7', label:'Closer', type:'any', sub:'pun', differFrom:null }
     ]
   };
@@ -310,7 +313,7 @@ function sixtyMinPattern() {
       { id:'u6', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
       { id:'u7', label:'Small Cast (Gimmick)', type:'small-cast', sub:'gimmick', differFrom:null },
       { id:'u8', label:'Small Cast (Scenic)', type:'small-cast', sub:'scenic', differFrom:null },
-      { id:'u9', label:'Flex \u2014 possible 2nd Guessing (if time allows)', type:'small-cast', sub:'any', differFrom:null, optional:true },
+      { id:'u9', label:'Flex possible 2nd Guessing (if time allows)', type:'small-cast', sub:'any', differFrom:null, optional:true },
       { id:'u10', label:'Closer', type:'any', sub:'pun', differFrom:null }
     ]
   };
